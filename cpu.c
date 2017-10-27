@@ -9,7 +9,7 @@
 
 #define QUEUE_SIZE 16
 #define MAX_PROCS 50
-#define QUANTUM_S 34 * 1000 / (MAX_PROCS / 3)
+#define QUANTUM_S 100
 
 static unsigned int sys_stack = 0;
 
@@ -53,11 +53,11 @@ int main() {
     while (Quantum_Timer) {
         //running pc ++
         //CHeck trap Values vs pc
-        //if true ^ -> call scheduler(IO_Trap)
+        //if true ^ -> call IO_Trap
         //Decrement Timers
         //if pc == max_PC -> term_Count++ & pc =0
         //if term_count == terminate -> call terminate
-        //if(IO_timer == 0) -> IO_Trap
+        //if(IO_timer == 0) -> IO_Ret
     }
     quantum_count++;
     //timerinterruptcall()
@@ -142,8 +142,8 @@ int scheduler(int schedule_bit, PCB_p * current, priority_queue pq, fifo_queue n
       while (old_procs->count > 0)//Clears zombie processes if there are 10 or more,
 	destructor(q_dequeue(old_procs));
     break;
-  case 3: //IO_trapCall
-  case 4: //IO ret call
+  case 3: //dispatcher
+  case 4: //dispatcher
   default:
     break;
   }
@@ -157,18 +157,18 @@ int scheduler(int schedule_bit, PCB_p * current, priority_queue pq, fifo_queue n
   return 0;
 }
 
-  /*
-    Returns the process froom IO queue
-  */
-  PCB_p IO_ret() {
+/*
+  Returns the process froom IO queue
+*/
+PCB_p IO_ret() {
     
-     }
-     /*
-      Puts calling process in blocked queue
-     */
-     void IO_Trap(PCB_p thepcb){
+}
+/*
+   Puts calling process in blocked queue
+*/
+void IO_Trap(PCB_p thepcb){
     
-     }
+}
 /*
   Puts first process into running state, and sets the sys_stack to this process.
 */
@@ -208,8 +208,8 @@ PCB_p find_first_empty(priority_queue pq) {
 /*
   Terminates the running process and moves it to a zombie state.
 */
-int terminate(int rand_pid[4], PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum_count, unsigned int * pc) {
-  if (current == NULL || *current == NULL || contains(rand_pid, (*current)->priority, 4) == 1) return -1;
+int terminate( PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum_count, unsigned int * pc) {
+  if (current == NULL || *current == NULL) return -1;
   enum state_type new = zombie;
   (*current)->state = new;
   q_enqueue(old_procs, *current);
@@ -218,9 +218,9 @@ int terminate(int rand_pid[4], PCB_p * current, priority_queue pq, fifo_queue ne
   return 0;
 }
 
-int checkTerm() {
-  return (rand() % 100) < 15;
-}
+// int checkTerm() {
+//   return (rand() % 100) < 15;
+// }
 
 /*
   helper method to check if the array conains an id assigned to a privledged process.
