@@ -114,6 +114,76 @@ int setChannel_no(PCB_p pcb, unsigned char channel_no) {
   return 0;
 }
 
+unsigned int get_MAX_PC(PCB_p pcb) {
+  return pcb->MAX_PC;
+}
+
+int set_MAX_PC(PCB_p pcb, int the_Max_pc) {
+  if (pcb == NULL) return -1;
+  pcb->MAX_PC = the_Max_pc;
+  return 0;
+}
+
+time_t get_creation(PCB_p pcb) {
+  return pcb->creation;
+}
+
+int set_creation(PCB_p pcb, time_t theTime) {
+  if (pcb == NULL) return -1;
+  pcb->creation = theTime;
+  return 0;
+}
+
+time_t get_termination(PCB_p pcb) {
+  return pcb->termination;
+}
+
+int set_termination(PCB_p pcb, time_t theTime) {
+  if (pcb == NULL) return -1;
+  pcb->termination = theTime;
+  return 0;
+}
+
+unsigned int get_terminate(PCB_p pcb) {
+  return pcb->terminate;
+}
+
+int set_terminate(PCB_p pcb, unsigned int theInt) {
+  if (pcb == NULL) return -1;
+  pcb->terminate = theInt;
+  return 0;
+}
+
+unsigned int get_term_count(PCB_p pcb) {
+  return pcb->term_count;
+}
+
+int set_term_count(PCB_p pcb, unsigned int theInt) {
+  if (pcb == NULL) return -1;
+  pcb->term_count = theInt;
+  return 0;
+}
+
+int *  get_IO_1_TRAPS(PCB_p pcb) {
+  return pcb->IO_1_TRAPS;
+}
+
+int set_IO_1_TRAPS(PCB_p pcb, int * theArr) {
+  if (pcb == NULL) return -1;
+  pcb->IO_1_TRAPS = theArr;
+  return 0;
+}
+
+int * get_IO_2_TRAPS (PCB_p pcb) {
+  return pcb->IO_2_TRAPS;
+}
+
+int set_IO_2_TRAPS(PCB_p pcb, int * theArr) {
+  if (pcb == NULL) return -1;
+  pcb->IO_2_TRAPS = theArr;
+  return 0;
+}
+
 char * toString(PCB_p pcb) {
   if (pcb == NULL) return NULL;
   char *str = malloc(512);
