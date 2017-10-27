@@ -29,10 +29,13 @@ int main() {
   PCB_p privelaged[4];
   unsigned int rand_pids[4];
   set_rand_pids(rand_pids);
-
+  
   unsigned int * pc = malloc(sizeof(unsigned int));
   *pc = 0;
-
+  unsigned int * Quantum_Timer = malloc(sizeof(unsigned int)); //QUantum Timer
+  *Quantum_Timer = 1;
+  unsigned int * IO_Timer = malloc(sizeof(unsigned int));
+  *IO_Timer = *Quantum_Timer * 3;
   //Fibonacci sequesnce or length of quantum based on prioriety
   int quantum[] = { 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597 }; 
   int * count = malloc(sizeof(int));
@@ -55,25 +58,41 @@ int main() {
   //
   // Init program sequence
   //
-  while (*count < MAX_PROCS) {
-    add_n(count, rand_pids, privelaged, &priv_len, new_procs);
+  // while (*count < MAX_PROCS) {
+  //   add_n(count, rand_pids, privelaged, &priv_len, new_procs);
 
-    // increment pc and quantum progress
-    *pc += increment_pc(current, pq, quantum_count);
+  //   // increment pc and quantum progress
+  //   *pc += increment_pc(current, pq, quantum_count);
 
-    // possible outcomes
-    // 1 : terminate
-    // 2 : timer_interrupt
-    if (checkTerm() == 1 && current != NULL && *current != NULL && contains(rand_pids, (*current)->pid, 4) != 1) {
-      terminate(rand_pids, current, pq, new_procs, old_procs, quantum_count, pc);
-    } else {
-      timer_interrupt(current, pq, new_procs, old_procs, quantum_count, pc);
+  //   // possible outcomes
+  //   // 1 : terminate
+  //   // 2 : timer_interrupt
+  //   if (checkTerm() == 1 && current != NULL && *current != NULL && contains(rand_pids, (*current)->pid, 4) != 1) {
+  //     terminate(rand_pids, current, pq, new_procs, old_procs, quantum_count, pc);
+  //   } else {
+  //     timer_interrupt(current, pq, new_procs, old_procs, quantum_count, pc);
+  //   }
+
+  //   // print output
+  //   char * output = to_string_3(iteration_count++, pq, privelaged);
+  //   printf("%s<CR>\n", output);
+  //   free(output);
+  // }
+
+   
+  while(1) {
+    //Generate Processes randomly
+    //scheduler(0)
+    while (Quantum_Timer) {
+        //running pc ++
+        //CHeck trap Values vs pc
+        //if true ^ -> call scheduler(IO_Trap)
+        //Decrement Timers
+        //if pc == max_PC -> term_Count++ & pc =0
+        //if term_count == terminate -> call scheduler(terminate)
+        //if(IO_timer == 0) -> scheduler(IO_ret)
     }
-
-    // print output
-    char * output = to_string_3(iteration_count++, pq, privelaged);
-    printf("%s<CR>\n", output);
-    free(output);
+    //scheduler(timer interrupt)
   }
 
   //cleanup
@@ -167,10 +186,23 @@ int scheduler(int schedule_bit, PCB_p * current, priority_queue pq, fifo_queue n
       while (old_procs->count > 0)//Clears zombie processes if there are 10 or more,
 	destructor(q_dequeue(old_procs));
     break;
+  case 3: //IO_trapCall
+  case 4: //IO ret call
   default:
     break;
   }
+  /*
+    Returns the process froom IO queue
+  */
+ PCB_p IO_ret() {
 
+ }
+ /*
+  Puts calling process in blocked queue
+ */
+ void IO_Trap(PCB_p thepcb){
+
+ }
   //When Time_S is reached reset priorieties of all in Prioriety Queue.
   if (*quantum >= QUANTUM_S) {
     *quantum = 0;

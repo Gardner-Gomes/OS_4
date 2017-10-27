@@ -3,6 +3,7 @@
 #include <string.h>
 #include "pcb.h"
 #include <errno.h>
+#include <time.h>
 
 static unsigned int pid = 0;
 
@@ -29,6 +30,15 @@ PCB_p constructor() {
   pcb->size = 0;
   pcb->channel_no = 0;
   pcb->parent = 0;
+
+  pcb->MAX_PC = 0;
+  pcb->creation = time(NULL);
+  pcb->termination = time(NULL);
+  pcb->terminate = 0;
+  pcb->term_count = 0;
+  pcb->IO_1_TRAPS;
+  pcb->IO_2_TRAPS;
+  
   assignPid(pcb, &pid);
   return pcb;
 }

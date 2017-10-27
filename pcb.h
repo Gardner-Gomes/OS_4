@@ -25,6 +25,15 @@ typedef struct pcb {// Process control block
   unsigned int size; // number of bytes in process
   unsigned char channel_no; // which I/O device or service Q// if process is blocked, which fifo_queue it is in
   CPU_context_p context; // set of cpu registers// other items to be added as needed.
+
+  unsigned int MAX_PC;
+  time_t creation;
+  time_t termination;
+  unsigned int terminate;
+  unsigned int term_count;
+  int IO_1_TRAPS [4];
+  int IO_2_TRAPS [4];
+
 } PCB_s;
 
 typedef PCB_s* PCB_p;
@@ -37,6 +46,21 @@ unsigned char getPriority(PCB_p pcb);
 unsigned char * getMem(PCB_p pcb);
 unsigned int getSize(PCB_p pcb);
 unsigned char getChannel_no(PCB_p pcb);
+
+unsigned int get_MAX_PC(PCB_p pcb);
+unsigned int set_MAX_PC(PCB_p pcb, int the_Max_pc);
+time_t get_creation(PCB_p pcb);
+void set_creation(PCB_p pcb, time_t theTime);
+time_t get_termination(PCB_p pcb);
+void set_termination(PCB_p pcb, time_t theTime);
+unsigned int get_terminate(PCB_p pcb);
+void set_terminate(PCB_p pcb, unsigned int theInt);
+unsigned int get_term_count(PCB_p pcb);
+void set_term_count(PCB_p pcb, unsigned int theInt);
+int *  get_IO_1_TRAPS(PCB_p pcb);
+void set_IO_1_TRAPS(PCB_p pcb, int * theArr);
+int * get_IO_2_TRAPS (PCB_p pcb);
+void set_IO_2_TRAPS(PCB_p pcb, int * theArr);
 
 int setState(PCB_p pcb, enum state_type new_state);
 int assignPid(PCB_p pcb, unsigned int * currentPid);
