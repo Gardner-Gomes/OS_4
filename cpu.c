@@ -25,10 +25,10 @@ int main() {
   // Used to manage current process
   PCB_p * current = malloc(sizeof(PCB_p));
 
-  // manage pointers to "privelaged" processes and assign random pid values to work with
-  PCB_p privelaged[4];
-  unsigned int rand_pids[4];
-  set_rand_pids(rand_pids);
+  // // manage pointers to "privelaged" processes and assign random pid values to work with
+  // PCB_p privelaged[4];
+  // unsigned int rand_pids[4];
+  // set_rand_pids(rand_pids);
   
   unsigned int * pc = malloc(sizeof(unsigned int));
   *pc = 0;
@@ -39,9 +39,9 @@ int main() {
   //Fibonacci sequesnce or length of quantum based on prioriety
   int quantum[] = { 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597 }; 
   int * count = malloc(sizeof(int));
-  unsigned int * quantum_count = malloc(sizeof(unsigned int));
-  int priv_len = 0;
-  *quantum_count = 0;
+  // unsigned int * quantum_count = malloc(sizeof(unsigned int));
+  // int priv_len = 0;
+  // *quantum_count = 0;
   *count = 0;
   *current = NULL;
   srand(time(NULL));
@@ -50,8 +50,8 @@ int main() {
   int i;
   for (i = 0; i < QUEUE_SIZE; i++)
     q_setquantum(get_queue(pq, i), quantum[i] * 1000);
-  for (i = 0; i < 4; i++)
-    privelaged[i] = NULL;
+  // for (i = 0; i < 4; i++)
+  //   privelaged[i] = NULL;
 
   int iteration_count = 0;
 
@@ -102,38 +102,44 @@ int main() {
   if (old_procs!= NULL) fifo_destructor(old_procs);
   if (pq!= NULL) priority_queue_destructor(pq);
   if (count != NULL) free(count);
-  if (quantum_count != NULL) free(quantum_count);
+  // if (quantum_count != NULL) free(quantum_count);
   if (pc != NULL) free(pc);
   return 0;
 }
 //
 //Adds a Random number of Processes to the queue. between 0-5
 //
-void add_n(int * count, unsigned int rand_pids[], PCB_p privelaged[4], int * priv_length, fifo_queue new_procs) {
+void add_n(int * count, unsigned int rand_pids[], PCB_p privelaged[4], fifo_queue new_procs) {
   int num = rand() % 6;
   int i;
   for (i = 0; i <= num; i++) {
     PCB_p temp = constructor();
+    //TODO Generate Trap Arrays set them.
+    //set Term Count Randomly
+    //set MAX_PC Randomly
     q_enqueue(new_procs, temp);
     (*count)++;
 
-    if (*priv_length < 4 && contains(rand_pids, temp->pid, 4) == 1) {
-      privelaged[*priv_length] = temp;
-      *priv_length += 1;
-    }
+
+
+
+    // if (*priv_length < 4 && contains(rand_pids, temp->pid, 4) == 1) {
+    //   privelaged[*priv_length] = temp;
+    //   *priv_length += 1;
+    // }
   }
 }
 
-/*
-  Randomly increments the PC for the process, based on quantum length.
-  Simulates running a process for a quantum.
-*/
-unsigned int increment_pc(PCB_p * current, priority_queue pq, unsigned int * quantum_count) {
-  if (pq == NULL || current == NULL || *current == NULL) return 0;
-  unsigned int t = rand() % get_queue(pq, (*current)->priority)->quantum;
-  *quantum_count += t;
-  return t;
-}
+// /*
+//   Randomly increments the PC for the process, based on quantum length.
+//   Simulates running a process for a quantum.
+// */
+// unsigned int increment_pc(PCB_p * current, priority_queue pq, unsigned int * quantum_count) {
+//   if (pq == NULL || current == NULL || *current == NULL) return 0;
+//   unsigned int t = rand() % get_queue(pq, (*current)->priority)->quantum;
+//   *quantum_count += t;
+//   return t;
+// }
 
 /*
   Timer Interrupt, sets running process to Interrupted then calls scheduler.
@@ -296,7 +302,7 @@ int contains(unsigned int arr[], unsigned int value, int size) {
 /*
   To_String method adhering to the format on ddocument for part 3.
 */
-char * to_string_3(int iteration_count, priority_queue pq, PCB_p privelaged[4]) {
+char * to_string_3(int iteration_count, priority_queue pq) {
   char * ret = malloc(sizeof(char) * 1024);
   memset(ret, 0, sizeof(char) * 1024);
 
@@ -315,16 +321,16 @@ char * to_string_3(int iteration_count, priority_queue pq, PCB_p privelaged[4]) 
     free(q_and_size);
   }
 
-  for (i = 0; i < 4; i++) {
-    PCB_p temp = privelaged[i];
-    if (temp != NULL) {
-      char * q_and_size = malloc(sizeof(char) * 256);
-      memset(q_and_size, 0, sizeof(char) * 256);
-      sprintf(q_and_size, "PCB: PID %u, PRIORITY %u PC %u\n", temp->pid, temp->priority, temp->context->pc);
-      strcat(ret, q_and_size);
-      free(q_and_size);
-    }
-  }
+  // for (i = 0; i < 4; i++) {
+  //   PCB_p temp = privelaged[i];
+  //   if (temp != NULL) {
+  //     char * q_and_size = malloc(sizeof(char) * 256);
+  //     memset(q_and_size, 0, sizeof(char) * 256);
+  //     sprintf(q_and_size, "PCB: PID %u, PRIORITY %u PC %u\n", temp->pid, temp->priority, temp->context->pc);
+  //     strcat(ret, q_and_size);
+  //     free(q_and_size);
+  //   }
+  // }
   return ret;
 }
 
