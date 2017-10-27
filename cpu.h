@@ -1,6 +1,6 @@
-void add_n(int * count, unsigned int rand_pids[], PCB_p * privelaged, fifo_queue new_procs);
+void add_n( fifo_queue new_procs);
 int checkTerm();
-void set_rand_pids(unsigned int rand_pids[]);
+// void set_rand_pids(unsigned int rand_pids[]);
 int contains(unsigned int arr[], unsigned int value, int size);
 
 PCB_p find_first_empty(priority_queue pq);

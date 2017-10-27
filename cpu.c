@@ -20,15 +20,11 @@ int main() {
   //
   priority_queue pq = priority_queue_constructor();
   fifo_queue new_procs = fifo_queue_constructor();
-  fifo_queue old_procs = fifo_queue_constructor();  
+  fifo_queue old_procs = fifo_queue_constructor(); 
+  fifo_queue IO_Queue = fifo_queue_constructor(); 
 
   // Used to manage current process
   PCB_p * current = malloc(sizeof(PCB_p));
-
-  // // manage pointers to "privelaged" processes and assign random pid values to work with
-  // PCB_p privelaged[4];
-  // unsigned int rand_pids[4];
-  // set_rand_pids(rand_pids);
   
   unsigned int * pc = malloc(sizeof(unsigned int));
   *pc = 0;
@@ -39,60 +35,33 @@ int main() {
   //Fibonacci sequesnce or length of quantum based on prioriety
   int quantum[] = { 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597 }; 
   int * count = malloc(sizeof(int));
-  // unsigned int * quantum_count = malloc(sizeof(unsigned int));
-  // int priv_len = 0;
-  // *quantum_count = 0;
   *count = 0;
+  int * quantum_count = malloc(sizeof(int));
+  *quantum_count = 0;
   *current = NULL;
   srand(time(NULL));
 
-  // setup quanutum values in queue
   int i;
   for (i = 0; i < QUEUE_SIZE; i++)
     q_setquantum(get_queue(pq, i), quantum[i] * 1000);
-  // for (i = 0; i < 4; i++)
-  //   privelaged[i] = NULL;
+ 
 
-  int iteration_count = 0;
-
-  //
-  // Init program sequence
-  //
-  // while (*count < MAX_PROCS) {
-  //   add_n(count, rand_pids, privelaged, &priv_len, new_procs);
-
-  //   // increment pc and quantum progress
-  //   *pc += increment_pc(current, pq, quantum_count);
-
-  //   // possible outcomes
-  //   // 1 : terminate
-  //   // 2 : timer_interrupt
-  //   if (checkTerm() == 1 && current != NULL && *current != NULL && contains(rand_pids, (*current)->pid, 4) != 1) {
-  //     terminate(rand_pids, current, pq, new_procs, old_procs, quantum_count, pc);
-  //   } else {
-  //     timer_interrupt(current, pq, new_procs, old_procs, quantum_count, pc);
-  //   }
-
-  //   // print output
-  //   char * output = to_string_3(iteration_count++, pq, privelaged);
-  //   printf("%s<CR>\n", output);
-  //   free(output);
-  // }
-
-   
   while(1) {
     //Generate Processes randomly
-    //scheduler(0)
+    add_n(new_procs);
+    scheduler(0,current,pq,new_procs,old_procs,quantum_count);
     while (Quantum_Timer) {
         //running pc ++
         //CHeck trap Values vs pc
         //if true ^ -> call scheduler(IO_Trap)
         //Decrement Timers
         //if pc == max_PC -> term_Count++ & pc =0
-        //if term_count == terminate -> call scheduler(terminate)
-        //if(IO_timer == 0) -> scheduler(IO_ret)
+        //if term_count == terminate -> call terminate
+        //if(IO_timer == 0) -> IO_Trap
     }
-    //scheduler(timer interrupt)
+    quantum_count++;
+    //timerinterruptcall()
+    
   }
 
   //cleanup
@@ -102,14 +71,13 @@ int main() {
   if (old_procs!= NULL) fifo_destructor(old_procs);
   if (pq!= NULL) priority_queue_destructor(pq);
   if (count != NULL) free(count);
-  // if (quantum_count != NULL) free(quantum_count);
   if (pc != NULL) free(pc);
   return 0;
 }
 //
 //Adds a Random number of Processes to the queue. between 0-5
 //
-void add_n(int * count, unsigned int rand_pids[], PCB_p privelaged[4], fifo_queue new_procs) {
+void add_n( fifo_queue new_procs) {
   int num = rand() % 6;
   int i;
   for (i = 0; i <= num; i++) {
@@ -118,33 +86,15 @@ void add_n(int * count, unsigned int rand_pids[], PCB_p privelaged[4], fifo_queu
     //set Term Count Randomly
     //set MAX_PC Randomly
     q_enqueue(new_procs, temp);
-    (*count)++;
 
-
-
-
-    // if (*priv_length < 4 && contains(rand_pids, temp->pid, 4) == 1) {
-    //   privelaged[*priv_length] = temp;
-    //   *priv_length += 1;
-    // }
   }
 }
 
-// /*
-//   Randomly increments the PC for the process, based on quantum length.
-//   Simulates running a process for a quantum.
-// */
-// unsigned int increment_pc(PCB_p * current, priority_queue pq, unsigned int * quantum_count) {
-//   if (pq == NULL || current == NULL || *current == NULL) return 0;
-//   unsigned int t = rand() % get_queue(pq, (*current)->priority)->quantum;
-//   *quantum_count += t;
-//   return t;
-// }
 
 /*
   Timer Interrupt, sets running process to Interrupted then calls scheduler.
 */
-int timer_interrupt(PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum, unsigned int * pc) {
+int timer_interrupt(PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum_count, unsigned int * pc) {
   if (pq == NULL) return 1;
   sys_stack = *pc;
   enum state_type new_state = interrupted;
@@ -152,7 +102,7 @@ int timer_interrupt(PCB_p * current, priority_queue pq, fifo_queue new_procs, fi
     (*current)->state = new_state;
     (*current)->context->pc = sys_stack;
   }
-  scheduler(1, current, pq, new_procs, old_procs, quantum);
+  scheduler(1, current, pq, new_procs, old_procs, quantum_count);
   pseudo_iret(pc);
   return 0;
 }
@@ -197,18 +147,7 @@ int scheduler(int schedule_bit, PCB_p * current, priority_queue pq, fifo_queue n
   default:
     break;
   }
-  /*
-    Returns the process froom IO queue
-  */
- PCB_p IO_ret() {
 
- }
- /*
-  Puts calling process in blocked queue
- */
- void IO_Trap(PCB_p thepcb){
-
- }
   //When Time_S is reached reset priorieties of all in Prioriety Queue.
   if (*quantum >= QUANTUM_S) {
     *quantum = 0;
@@ -218,6 +157,18 @@ int scheduler(int schedule_bit, PCB_p * current, priority_queue pq, fifo_queue n
   return 0;
 }
 
+  /*
+    Returns the process froom IO queue
+  */
+  PCB_p IO_ret() {
+    
+     }
+     /*
+      Puts calling process in blocked queue
+     */
+     void IO_Trap(PCB_p thepcb){
+    
+     }
 /*
   Puts first process into running state, and sets the sys_stack to this process.
 */
@@ -257,34 +208,18 @@ PCB_p find_first_empty(priority_queue pq) {
 /*
   Terminates the running process and moves it to a zombie state.
 */
-int terminate(int rand_pid[4], PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum, unsigned int * pc) {
+int terminate(int rand_pid[4], PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum_count, unsigned int * pc) {
   if (current == NULL || *current == NULL || contains(rand_pid, (*current)->priority, 4) == 1) return -1;
   enum state_type new = zombie;
   (*current)->state = new;
   q_enqueue(old_procs, *current);
-  scheduler(2, current, pq, new_procs, old_procs, quantum);
+  scheduler(2, current, pq, new_procs, old_procs, quantum_count);
   pseudo_iret(pc);
   return 0;
 }
 
 int checkTerm() {
   return (rand() % 100) < 15;
-}
-
-/*
-  Generates 4 random processes to privledged that cant be killed.
-  randomly chosen from first 1/5 of processes generated.
-*/
-void set_rand_pids(unsigned int * rand_pids) {
-  int i;
-  for (i = 0; i < 4; i++) *(rand_pids + i) = 0;
-  for (i = 0; i < 4; i++) {
-    int rand_pid;
-    do {
-      rand_pid = (unsigned) (rand() % (MAX_PROCS / 5));
-    } while (contains(rand_pids, rand_pid, 4) == 1);
-    rand_pids[i] = rand_pid;
-  }
 }
 
 /*
@@ -321,16 +256,6 @@ char * to_string_3(int iteration_count, priority_queue pq) {
     free(q_and_size);
   }
 
-  // for (i = 0; i < 4; i++) {
-  //   PCB_p temp = privelaged[i];
-  //   if (temp != NULL) {
-  //     char * q_and_size = malloc(sizeof(char) * 256);
-  //     memset(q_and_size, 0, sizeof(char) * 256);
-  //     sprintf(q_and_size, "PCB: PID %u, PRIORITY %u PC %u\n", temp->pid, temp->priority, temp->context->pc);
-  //     strcat(ret, q_and_size);
-  //     free(q_and_size);
-  //   }
-  // }
   return ret;
 }
 
