@@ -1,0 +1,10 @@
+Reset Quantum_count
+Check for max_procs
+    counter for PQ
+reset Quantum_Timer
+FInd QUantum_S value
+Check termination
+Check Other Traps
+IO_Ret
+IO_Trap
+Debugging/ segfault
