@@ -46,6 +46,7 @@ unsigned char getPriority(PCB_p pcb);
 unsigned char * getMem(PCB_p pcb);
 unsigned int getSize(PCB_p pcb);
 unsigned char getChannel_no(PCB_p pcb);
+unsigned int getPC(PCB_p pcb);
 
 unsigned int get_MAX_PC(PCB_p pcb);
 int set_MAX_PC(PCB_p pcb, int the_Max_pc);
@@ -70,5 +71,6 @@ int setPriority(PCB_p pcb, unsigned char priority);
 int setMem(PCB_p pcb, unsigned char * mem);
 int setSize(PCB_p pcb, unsigned int size);
 int setChannel_no(PCB_p pcb, unsigned char channel_no);
+int setPC(PCB_p pcb, unsigned int the_pc);
 char * toString(PCB_p pcb);
 char * context_toString(CPU_context_p context);

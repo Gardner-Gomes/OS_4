@@ -207,3 +207,13 @@ int setState(PCB_p pcb, enum state_type new_state) {
   pcb->state = new_state;
   return 0;
 }
+
+unsigned int getPC(PCB_p pcb) {
+  return pcb->context->pc;
+}
+
+int setPC(PCB_p pcb, unsigned int the_pc) {
+  if (pcb == NULL || pcb->context == NULL) return -1;
+  pcb->context->pc = the_pc;
+  return 0;
+}

@@ -11,6 +11,9 @@ char * to_string_3(int iteration_count, priority_queue pq);
 int reset_all_priority(priority_queue pq);
 unsigned int increment_pc(PCB_p * current, priority_queue pq, unsigned int * quantum_count);
 
-int terminate( PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum, unsigned int * pc);
-int timer_interrupt(PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum, unsigned int * pc);
+int terminate( PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum);
+int timer_interrupt(PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum);
 void pseudo_iret(unsigned int * pc);
+
+PCB_p IO_ret();
+void IO_Trap(PCB_p thepcb);
