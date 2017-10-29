@@ -18,16 +18,13 @@ int main() {
   //
   // Init all variables for processes
   //
-  printf("of\n");
   priority_queue pq = priority_queue_constructor();
   fifo_queue new_procs = fifo_queue_constructor();
   fifo_queue old_procs = fifo_queue_constructor(); 
   fifo_queue IO_Queue = fifo_queue_constructor(); 
-  printf("of\n");
   // Used to manage current process
   PCB_p * current = malloc(sizeof(PCB_p));
   
-  printf("of\n");
   unsigned int * pc = malloc(sizeof(unsigned int));
   *pc = 0;
   unsigned int * Quantum_Timer = malloc(sizeof(unsigned int)); //QUantum Timer
@@ -42,12 +39,10 @@ int main() {
   *quantum_count = 0;
   *current = NULL;
   srand(time(NULL));
-  printf("of\n");
   int i;
   for (i = 0; i < QUEUE_SIZE; i++)
     q_setquantum(get_queue(pq, i), quantum[i] * 1000);
  
-  printf("of\n");
   while(1) {
     //Generate Processes randomly
     //if pq < maxprocs
@@ -55,15 +50,15 @@ int main() {
     printf("0\n"); 
     add_n(new_procs);
 
-    printf("of\n");
+    printf("\nof\n");
     scheduler(0,current,pq,new_procs,old_procs,quantum_count);
-    printf("%d\n", (*current)->pid);
+    printf("\npid:%d\n", (*current)->pid);
 
     *Quantum_Timer = quantum[(*current)->priority] + 1000;
     while (*Quantum_Timer) {
         //running pc ++
       printf("1\n");
-      printf("%d\n", (*current)->context->pc);
+      printf("PC:%d\n", (*current)->context->pc);
       (*current)->context->pc++;
         //CHeck trap Values vs pc
       printf("2\n");
@@ -122,13 +117,16 @@ int main() {
 //Adds a Random number of Processes to the queue. between 0-5
 //
 void add_n( fifo_queue new_procs) {
-  int num = rand() % 6;
+  int num = rand() % 6 + 1;
   int i;
-  for (i = 0; i <= num; i++) {
+  printf("\n%d Processes\n", num);
+  for (i = 0; i < num; i++) {
+    printf("\nprocess: %d\n\n", i);
     PCB_p temp = constructor();
 
     //set MAX_PC Randomly
     unsigned int max = rand() % 10000;
+    printf("\nmax pc: %d\n\n", max);
     set_MAX_PC(temp, max);
 
     //TODO Generate Trap Arrays set them.
@@ -143,6 +141,8 @@ void add_n( fifo_queue new_procs) {
       */
       IO1[j] = rand() % max;
       IO2[j] = rand() % max;
+
+      printf("IO1[%d]: %d, IO2[%d]: %d\n", j, IO1[j], j, IO2[j]);
     }
     set_IO_1_TRAPS(temp, IO1);
     set_IO_2_TRAPS(temp, IO2);
@@ -150,12 +150,25 @@ void add_n( fifo_queue new_procs) {
     //set Term Count Randomly
 
     int termC = rand() % 11;
+    printf("\nTerm Count: %d\n", termC);
     set_term_count(temp, termC);
+
     char * why = toString(temp);
-    printf("%s\n", why);
+    printf("\n%s\n", why);
+    free(why);
     q_enqueue(new_procs, temp);
 
+    why = q_toString(new_procs);
+    printf("\n%s\n", why);
+    free(why);
+
   }
+
+  char * why = q_toString(new_procs);
+  printf("\n%s\n", why);
+  free(why);
+
+  
 }
 
 
