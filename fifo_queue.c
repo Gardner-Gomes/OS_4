@@ -30,17 +30,17 @@ int q_enqueue(fifo_queue the_queue, PCB_p theitem) {
   node->next = NULL;
   node->data = theitem;
   the_queue->count++;
-  printf("\nbefore\n");
+  // printf("\nbefore\n");
   if (the_queue->head==NULL) {
     the_queue->head=node;
     the_queue->tail=node;
     return 0;
   }
-  printf("after\n");
+  // printf("after\n");
   the_queue->tail->next = node;
-  printf("after\n");
+  // printf("after\n");
   the_queue->tail = node;
-  printf("return\n");
+  // printf("return\n");
   return 0;
 }
 

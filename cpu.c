@@ -24,10 +24,6 @@ int main() {
   fifo_queue IO_Queue = fifo_queue_constructor(); 
   // Used to manage current process
   PCB_p * current = malloc(sizeof(PCB_p));
-<<<<<<< HEAD
-=======
-  
->>>>>>> 8eefa56a403cc616c9cb327eef017fa2a060a726
   unsigned int * pc = malloc(sizeof(unsigned int));
   *pc = 0;
   unsigned int * Quantum_Timer = malloc(sizeof(unsigned int)); //QUantum Timer
@@ -47,35 +43,24 @@ int main() {
   for (i = 0; i < QUEUE_SIZE; i++)
     q_setquantum(get_queue(pq, i), quantum[i] * 1000);
  
-<<<<<<< HEAD
   printf("Before Loop\n");
-=======
->>>>>>> 8eefa56a403cc616c9cb327eef017fa2a060a726
   while(1) {
     //Generate Processes randomly
     //if pq < maxprocs
     //if(pq) {
-    if(Number_Of_Procs <= 50) {
+    if(Number_Of_Procs <= 200 && IO_Queue->count < 60) {
        add_n(new_procs);
     }
    
 
-<<<<<<< HEAD
     printf("Big While Loop\n");
     safety = scheduler(4,current,pq,new_procs,old_procs,quantum_count,IO_Queue);
     
     printf("Current PID: %d\n", (*current)->pid);
-=======
-    printf("\nof\n");
-    scheduler(0,current,pq,new_procs,old_procs,quantum_count);
-    printf("\npid:%d\n", (*current)->pid);
->>>>>>> 8eefa56a403cc616c9cb327eef017fa2a060a726
 
     *Quantum_Timer = pq[(*current)->priority]->quantum;
     printf("Quantum Timer: %d\n", *Quantum_Timer);
     while (*Quantum_Timer) {
-<<<<<<< HEAD
-          
         printf("NOT NULL\n");
           //running pc ++
         // printf("One Instruction WHILE\n");
@@ -109,7 +94,7 @@ int main() {
 
           //if(IO_Timer == 0) -> IO_Ret
         if(*IO_Timer == 0) {
-          *IO_Timer = *Quantum_Timer * 2;
+          *IO_Timer = *Quantum_Timer / 3;
           IO_ret(pq,IO_Queue);
           printf("IO RET\n");
         }
@@ -125,45 +110,9 @@ int main() {
         
           printf("End of Loop\n");
       
-=======
-        //running pc ++
-      printf("1\n");
-      printf("PC:%d\n", (*current)->context->pc);
-      (*current)->context->pc++;
-        //CHeck trap Values vs pc
-      printf("2\n");
-      if(contains((*current)->IO_1_TRAPS, (*current)->context->pc, 4) ||
-          contains((*current)->IO_2_TRAPS, (*current)->context->pc, 4)) {
-        IO_Trap(*current);
-      }
-        //if true ^ -> call IO_Trap
-
-        //Decrement Timers
-      printf("3\n");
-      *Quantum_Timer--;
-      *IO_Timer--;
-        //if pc == max_PC -> term_Count++ & pc =0
-      printf("4\n");
-      if((*current)->context->pc == (*current)->MAX_PC) {
-        (*current)->term_count++;
-        (*current)->context->pc = 0;
-      }
-        //if term_count == terminate -> call terminate
-      printf("5\n");
-      if ((*current)->term_count == (*current)->terminate) {
-        terminate(current, pq, new_procs, old_procs, quantum_count);
-      }
-
-        //if(IO_Timer == 0) -> IO_Ret
-      printf("6\n");
-      if(*IO_Timer == 0) {
-        IO_ret();
-      }
->>>>>>> 8eefa56a403cc616c9cb327eef017fa2a060a726
     }
 
     *quantum_count = *quantum_count + 1;
-
     //timerinterruptcall()
     printf("Timer INT\n");
     safety = timer_interrupt(current, pq, new_procs, old_procs, quantum_count, IO_Queue);
@@ -187,19 +136,11 @@ int main() {
 //Adds a Random number of Processes to the queue. between 0-5
 //
 void add_n( fifo_queue new_procs) {
-<<<<<<< HEAD
   printf("ADD N\n");
-  int num = rand() % 200;
+  int num = rand() % 40;
   Number_Of_Procs = Number_Of_Procs + num;
   int i;
   for (i = 0; i < num; i++) {
-=======
-  int num = rand() % 6 + 1;
-  int i;
-  printf("\n%d Processes\n", num);
-  for (i = 0; i < num; i++) {
-    printf("\nprocess: %d\n\n", i);
->>>>>>> 8eefa56a403cc616c9cb327eef017fa2a060a726
     PCB_p temp = constructor();
 
     //set MAX_PC Randomly
@@ -218,13 +159,10 @@ void add_n( fifo_queue new_procs) {
 
       */
       IO1[j] = rand() % max;
-<<<<<<< HEAD
-      IO2[j] = rand() % max / 2;
-=======
       IO2[j] = rand() % max;
 
       printf("IO1[%d]: %d, IO2[%d]: %d\n", j, IO1[j], j, IO2[j]);
->>>>>>> 8eefa56a403cc616c9cb327eef017fa2a060a726
+
     }
     set_IO_1_TRAPS(temp, IO1);
     set_IO_2_TRAPS(temp, IO2);
@@ -232,19 +170,10 @@ void add_n( fifo_queue new_procs) {
     //set Term Count Randomly
     
     int termC = rand() % 11;
-<<<<<<< HEAD
     printf("term Count == %d\n",termC);
-=======
-    printf("\nTerm Count: %d\n", termC);
->>>>>>> 8eefa56a403cc616c9cb327eef017fa2a060a726
     set_term_count(temp, termC);
 
     char * why = toString(temp);
-<<<<<<< HEAD
-=======
-    printf("\n%s\n", why);
-    free(why);
->>>>>>> 8eefa56a403cc616c9cb327eef017fa2a060a726
     q_enqueue(new_procs, temp);
 
     why = q_toString(new_procs);
@@ -252,16 +181,7 @@ void add_n( fifo_queue new_procs) {
     free(why);
 
   }
-<<<<<<< HEAD
   printf("Number Of New Procs Added: %d\n", num);
-=======
-
-  char * why = q_toString(new_procs);
-  printf("\n%s\n", why);
-  free(why);
-
-  
->>>>>>> 8eefa56a403cc616c9cb327eef017fa2a060a726
 }
 
 
@@ -271,7 +191,9 @@ void add_n( fifo_queue new_procs) {
 int timer_interrupt(PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum_count, fifo_queue IO_Queue) {
   int safety = 1;
   if (pq == NULL) return safety;
-  if (current == NULL || *current == NULL) return -1;
+  if (current == NULL || *current == NULL) {
+    return -1;
+  } 
   sys_stack = (*current)->context->pc;
   enum state_type new_state = interrupted;
   if (current != NULL && (*current) != NULL) {
@@ -389,7 +311,7 @@ int dispatcher(PCB_p * current, priority_queue pq) {
   if (pq == NULL) return 1;
   if (current != NULL && (*current) != NULL)
     (*current)->context->pc = sys_stack;
-
+  
   PCB_p new_proc = find_first_empty(pq);
   if (new_proc != NULL) {
     printf("Here\n");
@@ -398,8 +320,9 @@ int dispatcher(PCB_p * current, priority_queue pq) {
     *current = new_proc;
     sys_stack = new_proc->context->pc;
   } else {
-    *current = NULL;
+    // *current = NULL;
     printf("Crash?\n");
+    return -1;
     // printf("PID? : %d\n", (*current)->pid);
   }
   printf("after Crash?\n");
