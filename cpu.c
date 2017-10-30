@@ -34,7 +34,7 @@ int main() {
   unsigned int * Quantum_Timer = malloc(sizeof(unsigned int)); //QUantum Timer
   *Quantum_Timer = 1;
   unsigned int * IO_Timer = malloc(sizeof(unsigned int));
-  *IO_Timer = *Quantum_Timer / 2;
+  *IO_Timer = *Quantum_Timer * 3;
   //Fibonacci sequesnce or length of quantum based on prioriety
   int quantum[] = { 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597 }; 
   int * count = malloc(sizeof(int));
@@ -53,7 +53,7 @@ int main() {
     //Generate Processes randomly
     //if pq < maxprocs
     //if(pq) {
-    if(Number_Of_Procs <= 200 && IO_Queue->count < 60) {
+    if(Number_Of_Procs <= 1000 && IO_Queue->count < 60) {
        add_n(new_procs);
       //  printf("Adding New Procs\n");
     } // Does not add more than 200 processes and checks if less than 60 waiting on IO.
@@ -68,7 +68,7 @@ int main() {
       *Quantum_Timer = pq[(*current)->priority]->quantum;
       printf("Current PID: %d\n", (*current)->pid);
     }
-    *IO_Timer = *Quantum_Timer / 3;
+    *IO_Timer = *Quantum_Timer * 2;
     // printf("Quantum Timer: %d\n", *Quantum_Timer);
     while (*Quantum_Timer) {
       if(safety == -1) { // if no process is running break out and schedule next processess
@@ -117,7 +117,7 @@ int main() {
 
           //if(IO_Timer == 0) -> IO_Ret
         if(*IO_Timer <= 0 && IO_Queue->count > 0) {
-          *IO_Timer = *Quantum_Timer / 3;
+          *IO_Timer = *Quantum_Timer * 2;
           IO_ret(pq,IO_Queue);
           printf("IO RET\n");
         }
@@ -365,8 +365,8 @@ int dispatcher(PCB_p * current, priority_queue pq) {
         crashes unless you coment out the change of current.
         TODO
     */
-    // PCB_p IDLE = constructor();
-    // *current = IDLE;
+    PCB_p IDLE = constructor();
+    *current = IDLE;
     // printf("Crash?\n");
     return -1;
     // printf("PID? : %d\n", (*current)->pid);
