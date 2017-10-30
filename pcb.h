@@ -31,8 +31,8 @@ typedef struct pcb {// Process control block
   time_t termination;
   unsigned int terminate;
   unsigned int term_count;
-  int * IO_1_TRAPS;
-  int * IO_2_TRAPS;
+  unsigned int * IO_1_TRAPS;
+  unsigned int * IO_2_TRAPS;
 
 } PCB_s;
 

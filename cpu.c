@@ -109,7 +109,7 @@ int main() {
           //if pc == max_PC -> term_Count++ & pc =0
         if((*current)->context->pc == (*current)->MAX_PC) { //Resets the PC Value if it reached Max WORKS
           (*current)->term_count = (*current)->term_count + 1;
-          printf("TermCount: %d MAX: %d ",(*current)->term_count , (*current)->terminate);
+          // printf("TermCount: %d MAX: %d ",(*current)->term_count , (*current)->terminate);
           (*current)->context->pc = 0;
           // printf("MAX_PC MET\n");
         }
@@ -177,7 +177,7 @@ void add_n( fifo_queue new_procs) {
     int IO1[4];
     int IO2[4];
     int j;
-    for (j = 0; j <= 4; j++) {
+    for (j = 0; j < 4; j++) {
       /*
 
       DEBUG THIS SHIT

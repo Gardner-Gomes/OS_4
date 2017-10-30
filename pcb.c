@@ -36,9 +36,8 @@ PCB_p constructor() {
   pcb->termination;
   pcb->terminate = 9999;
   pcb->term_count = 0;
-  int arr[4];
-  pcb->IO_1_TRAPS = arr;
-  pcb->IO_2_TRAPS = arr;
+  pcb->IO_1_TRAPS = malloc(sizeof(unsigned int)*4);
+  pcb->IO_2_TRAPS = malloc(sizeof(unsigned int)*4);
   
   assignPid(pcb, &pid);
   return pcb;
