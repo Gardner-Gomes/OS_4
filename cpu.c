@@ -13,8 +13,9 @@
 
 static unsigned int sys_stack = 0;
 int Number_Of_Procs = 0;
-int main() {
 
+int main() {
+  
   //
   // Init all variables for processes
   //
@@ -29,7 +30,7 @@ int main() {
   unsigned int * Quantum_Timer = malloc(sizeof(unsigned int)); //QUantum Timer
   *Quantum_Timer = 1;
   unsigned int * IO_Timer = malloc(sizeof(unsigned int));
-  *IO_Timer = *Quantum_Timer * 2;
+  *IO_Timer = *Quantum_Timer / 2;
   //Fibonacci sequesnce or length of quantum based on prioriety
   int quantum[] = { 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597 }; 
   int * count = malloc(sizeof(int));
@@ -59,30 +60,40 @@ int main() {
     printf("Current PID: %d\n", (*current)->pid);
 
     *Quantum_Timer = pq[(*current)->priority]->quantum;
+    *IO_Timer = *Quantum_Timer / 3;
     printf("Quantum Timer: %d\n", *Quantum_Timer);
     while (*Quantum_Timer) {
-        printf("NOT NULL\n");
+      if(safety == -1) {
+        break;
+      }
           //running pc ++
         // printf("One Instruction WHILE\n");
         // printf("PC VALUE: %d\n", (*current)->context->pc);
         (*current)->context->pc = (*current)->context->pc + 1;
           //CHeck trap Values vs pc
-      
+        printf("Current PC Value: %d\n",(*current)->context->pc);
+        /*
+        Figure out how to access the elements of the array in the struct
+        It is not getting the right values to compare against and is true every 8 or 11 cycles right now.
+
+        */
         if(contains((*current)->IO_1_TRAPS, (*current)->context->pc, 4) ||
             contains((*current)->IO_2_TRAPS, (*current)->context->pc, 4)) {
             safety = IO_Trap(current, pq, new_procs, old_procs, quantum_count, IO_Queue);//calls IO_trap
-            if(safety = -1) {
+            if(safety == -1) {
               printf("IO TRAP CALL Safety\n");
               break;
             }
-            printf("IO TRAP CALL\n");
+            printf("IO TRAP CALL new PID: %d\n", (*current)->pid);
             *Quantum_Timer = pq[(*current)->priority]->quantum;
         }
          
 
           //Decrement Timers
+          // printf("Quantum Timer: %d\n", *Quantum_Timer);
         *Quantum_Timer = *Quantum_Timer - 1;
         *IO_Timer = *IO_Timer - 1;
+        printf("IO Timer: %d\nQuantum Timer: %d\n", *IO_Timer, *Quantum_Timer);
           //if pc == max_PC -> term_Count++ & pc =0
         if((*current)->context->pc == (*current)->MAX_PC) {
           (*current)->term_count = (*current)->term_count + 1;
@@ -93,16 +104,17 @@ int main() {
         
 
           //if(IO_Timer == 0) -> IO_Ret
-        if(*IO_Timer == 0) {
+        if(*IO_Timer <= 0 && IO_Queue->count > 0) {
           *IO_Timer = *Quantum_Timer / 3;
           IO_ret(pq,IO_Queue);
           printf("IO RET\n");
         }
           //if term_count == terminate -> call terminate
           if ((*current)->term_count >= (*current)->terminate) {
+            printf("SHould this terminate: %d >= %d\n",(*current)->term_count, (*current)->terminate);
             safety = terminate(current, pq, new_procs, old_procs, quantum_count, IO_Queue);
             printf("TERMINATE\n");
-            if(safety = -1) {
+            if(safety == -1) {
               break;
             }
             *Quantum_Timer = pq[(*current)->priority]->quantum;            
@@ -137,7 +149,7 @@ int main() {
 //
 void add_n( fifo_queue new_procs) {
   printf("ADD N\n");
-  int num = rand() % 40;
+  int num = rand() % 6;
   Number_Of_Procs = Number_Of_Procs + num;
   int i;
   for (i = 0; i < num; i++) {
@@ -170,8 +182,10 @@ void add_n( fifo_queue new_procs) {
     //set Term Count Randomly
     
     int termC = rand() % 11;
-    printf("term Count == %d\n",termC);
-    set_term_count(temp, termC);
+    printf("term Count == %d\n",temp->term_count);
+    temp->terminate = termC;
+    printf("term Count max == %d\n", temp->terminate);
+    // set_term_count(temp, termC);
 
     char * why = toString(temp);
     q_enqueue(new_procs, temp);
@@ -268,7 +282,7 @@ int scheduler(int schedule_bit, PCB_p * current, priority_queue pq, fifo_queue n
     
     break;
   }
-
+  if (current == NULL || *current == NULL) return -1;
   //When Time_S is reached reset priorieties of all in Prioriety Queue.
   if (*quantum >= QUANTUM_S) {
     *quantum = 0;
@@ -282,13 +296,14 @@ int scheduler(int schedule_bit, PCB_p * current, priority_queue pq, fifo_queue n
   Returns the process froom IO queue
 */
 PCB_p IO_ret(priority_queue pq, fifo_queue IO_Queue) {
+  printf("IO_RETTTTTT\n");
   PCB_p ready_Proc = q_dequeue(IO_Queue);
   if (ready_Proc != NULL) {
     enum state_type new_state = ready;
     ready_Proc->state = new_state;
     enqueue_ready(pq, ready_Proc->priority, ready_Proc);
   }
-  printf("IO_QUEUE SIZE: %d\n", IO_Queue->count);
+  printf("ret Call IO_QUEUE SIZE: %d\n", IO_Queue->count);
 }
 /*
    Puts calling process in blocked queue
@@ -298,7 +313,7 @@ int IO_Trap( PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queu
   enum state_type new = blocked;
   (*current)->state = new;
   q_enqueue(IO_Queue, *current);
-  printf("IO_QUEUE SIZE: %d\n", IO_Queue->count);
+  printf("Trap Call IO_QUEUE SIZE: %d\n", IO_Queue->count);
   scheduler(3, current, pq, new_procs, old_procs, quantum_count, IO_Queue);
   // pseudo_iret(&(*current)->context->pc);
   return 0;
@@ -320,9 +335,10 @@ int dispatcher(PCB_p * current, priority_queue pq) {
     *current = new_proc;
     sys_stack = new_proc->context->pc;
   } else {
-    // *current = NULL;
-    printf("Crash?\n");
-    return -1;
+    // PCB_p IDLE = constructor();
+    // *current = IDLE;
+    // printf("Crash?\n");
+    // return -1;
     // printf("PID? : %d\n", (*current)->pid);
   }
   printf("after Crash?\n");
@@ -366,13 +382,19 @@ int terminate( PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_qu
 /*
   helper method to check if the array conains an id assigned to a privledged process.
 */
-int contains(unsigned int arr[], unsigned int value, int size) {
+int contains( int * arr,  int value, int size) {
   int i;
+  int retval = 0;
   for (i = 0; i < size; i++) {
-    if (arr[i] == value)
-      return 1;
+    printf("ArrVal: %d\n",arr[i]);
+    if (arr[i] == value) {
+        printf("PC: %d ARRVAL: %d\n",value,arr[i]);
+        retval = 1;
+        printf("CONTAINS TRUE\n");
+        break;
+    }
   }
-  return 0;
+  return retval;
 }
 
 /*

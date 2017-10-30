@@ -1,7 +1,7 @@
 void add_n( fifo_queue new_procs);
 int checkTerm();
 // void set_rand_pids(unsigned int rand_pids[]);
-int contains(unsigned int arr[], unsigned int value, int size);
+int contains( int * arr,  int value, int size);
 
 PCB_p find_first_empty(priority_queue pq);
 int dispatcher(PCB_p * current, priority_queue pq);
