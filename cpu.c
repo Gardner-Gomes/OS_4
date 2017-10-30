@@ -59,7 +59,7 @@ int main() {
     } // Does not add more than 200 processes and checks if less than 60 waiting on IO.
    
 
-    printf("Big While Loop\n"); //Outer WHile loop for debugging.
+    // printf("Big While Loop\n"); //Outer WHile loop for debugging.
     safety = scheduler(4,current,pq,new_procs,old_procs,quantum_count,IO_Queue); //Safety is a check if current process is null
     
     printf("Current PID: %d\n", (*current)->pid);
@@ -87,20 +87,20 @@ int main() {
         TODO
         */
 
-        if(contains((*current)->IO_1_TRAPS, (*current)->context->pc, 4) ||
-            contains((*current)->IO_2_TRAPS, (*current)->context->pc, 4)) {
-            safety = IO_Trap(current, pq, new_procs, old_procs, quantum_count, IO_Queue);//calls IO_trap
-            if(safety == -1) {
-              printf("IO TRAP CALL Safety\n");
-              break;
-            }
-            printf("IO TRAP CALL new PID: %d\n", (*current)->pid);
-            *Quantum_Timer = pq[(*current)->priority]->quantum;
-        }
+        // if(contains((*current)->IO_1_TRAPS, (*current)->context->pc, 4) ||
+        //     contains((*current)->IO_2_TRAPS, (*current)->context->pc, 4)) {
+        //     safety = IO_Trap(current, pq, new_procs, old_procs, quantum_count, IO_Queue);//calls IO_trap
+        //     if(safety == -1) {
+        //       printf("IO TRAP CALL Safety\n");
+        //       break;
+        //     }
+        //     printf("IO TRAP CALL new PID: %d\n", (*current)->pid);
+        //     *Quantum_Timer = pq[(*current)->priority]->quantum;
+        // }
          
 
           //Decrement Timers
-          printf("Quantum Timer: %d\n", *Quantum_Timer);
+          // printf("Quantum Timer: %d\n", *Quantum_Timer);
         *Quantum_Timer = *Quantum_Timer - 1;
         *IO_Timer = *IO_Timer - 1;
 
@@ -123,7 +123,7 @@ int main() {
           //if term_count == terminate -> call terminate
           //Possible Broken
           if ((*current)->term_count >= (*current)->terminate) {
-            printf("SHould this terminate: %d >= %d\n",(*current)->term_count, (*current)->terminate);
+            // printf("SHould this terminate: %d >= %d\n",(*current)->term_count, (*current)->terminate);
             safety = terminate(current, pq, new_procs, old_procs, quantum_count, IO_Queue);
             printf("TERMINATE\n");
             if(safety == -1) {
@@ -132,13 +132,13 @@ int main() {
             *Quantum_Timer = pq[(*current)->priority]->quantum;            
           }
         
-          printf("End of Loop\n");
+          // printf("End of Loop\n");
       
     }
 
     *quantum_count = *quantum_count + 1;
     //timerinterruptcall()
-    printf("Timer INT\n");
+    // printf("Timer INT\n");
     safety = timer_interrupt(current, pq, new_procs, old_procs, quantum_count, IO_Queue);
     char * output = to_string_3(*quantum_count, pq);
     printf("%s\n", output);
@@ -248,7 +248,7 @@ int scheduler(int schedule_bit, PCB_p * current, priority_queue pq, fifo_queue n
   int safety = 2;
   if (pq == NULL) return 1;
   
-  printf("Scheduler\n");
+  // printf("Scheduler\n");
   // add new processes to current processes
   while (new_procs->count > 0) {
     // printf("Adding new procs to queue\n");
