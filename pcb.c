@@ -31,13 +31,14 @@ PCB_p constructor() {
   pcb->channel_no = 0;
   pcb->parent = 0;
 
-  pcb->MAX_PC = 0;
-  pcb->creation = time(NULL);
-  pcb->termination = time(NULL);
-  pcb->terminate = 0;
+  pcb->MAX_PC = 99999;
+  pcb->creation;
+  pcb->termination;
+  pcb->terminate = 9999;
   pcb->term_count = 0;
-  pcb->IO_1_TRAPS = NULL;
-  pcb->IO_2_TRAPS = NULL;
+  int arr[4];
+  pcb->IO_1_TRAPS = arr;
+  pcb->IO_2_TRAPS = arr;
   
   assignPid(pcb, &pid);
   return pcb;
@@ -171,7 +172,7 @@ int *  get_IO_1_TRAPS(PCB_p pcb) {
 int set_IO_1_TRAPS(PCB_p pcb, int * theArr) {
   if (pcb == NULL) return -1;
   int i;
-  pcb->IO_1_TRAPS = theArr;
+  *(pcb->IO_1_TRAPS) = *theArr;
   //for (i = 0; i < 4; i++) printf ("%d\n", pcb->IO_1_TRAPS[i]);
   return 0;
 }
@@ -180,9 +181,9 @@ int * get_IO_2_TRAPS (PCB_p pcb) {
   return pcb->IO_2_TRAPS;
 }
 
-int set_IO_2_TRAPS(PCB_p pcb, int * theArr) {
+int set_IO_2_TRAPS(PCB_p pcb, int * theArr ){
   if (pcb == NULL) return -1;
-  pcb->IO_2_TRAPS = theArr;
+  *(pcb->IO_2_TRAPS) = *theArr;
   return 0;
 }
 

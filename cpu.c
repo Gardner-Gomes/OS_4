@@ -48,24 +48,25 @@ int main() {
   for (i = 0; i < QUEUE_SIZE; i++)
     q_setquantum(get_queue(pq, i), quantum[i] * 1000);
  
-  printf("Before Loop\n");
+  // printf("Before Loop\n");
   while(1) {
     //Generate Processes randomly
     //if pq < maxprocs
     //if(pq) {
     if(Number_Of_Procs <= 200 && IO_Queue->count < 60) {
        add_n(new_procs);
-       printf("Adding New Procs\n");
+      //  printf("Adding New Procs\n");
     } // Does not add more than 200 processes and checks if less than 60 waiting on IO.
    
 
     // printf("Big While Loop\n"); //Outer WHile loop for debugging.
     safety = scheduler(4,current,pq,new_procs,old_procs,quantum_count,IO_Queue); //Safety is a check if current process is null
     
-    printf("Current PID: %d\n", (*current)->pid);
+    
 
     if(safety != -1) {
       *Quantum_Timer = pq[(*current)->priority]->quantum;
+      printf("Current PID: %d\n", (*current)->pid);
     }
     *IO_Timer = *Quantum_Timer / 3;
     // printf("Quantum Timer: %d\n", *Quantum_Timer);
@@ -86,7 +87,7 @@ int main() {
         BROKEN 
         TODO
         */
-        //for (i = 0; i < 4; i++) printf ("%d\n", pcb->IO_1_TRAPS[i]);
+        // for (i = 0; i < 4; i++) printf ("%d\n", (*current)->IO_1_TRAPS[i]);
         if(contains((*current)->IO_1_TRAPS, (*current)->context->pc, 4) ||
             contains((*current)->IO_2_TRAPS, (*current)->context->pc, 4)) {
             safety = IO_Trap(current, pq, new_procs, old_procs, quantum_count, IO_Queue);//calls IO_trap
@@ -94,7 +95,7 @@ int main() {
               printf("IO TRAP CALL Safety\n");
               break;
             }
-            printf("IO TRAP CALL new PID: %d\n", (*current)->pid);
+            // printf("IO TRAP CALL new PID: %d\n", (*current)->pid);
             *Quantum_Timer = pq[(*current)->priority]->quantum;
         }
          
@@ -108,7 +109,7 @@ int main() {
           //if pc == max_PC -> term_Count++ & pc =0
         if((*current)->context->pc == (*current)->MAX_PC) { //Resets the PC Value if it reached Max WORKS
           (*current)->term_count = (*current)->term_count + 1;
-          // printf("TermCount: %d MAX: %d ",(*current)->term_count , (*current)->terminate);
+          printf("TermCount: %d MAX: %d ",(*current)->term_count , (*current)->terminate);
           (*current)->context->pc = 0;
           // printf("MAX_PC MET\n");
         }
@@ -125,7 +126,7 @@ int main() {
           if ((*current)->term_count >= (*current)->terminate) {
             // printf("SHould this terminate: %d >= %d\n",(*current)->term_count, (*current)->terminate);
             safety = terminate(current, pq, new_procs, old_procs, quantum_count, IO_Queue);
-            printf("TERMINATE\n");
+            // printf("TERMINATE\n");
             if(safety == -1) {
               break;
             }
@@ -169,7 +170,7 @@ void add_n( fifo_queue new_procs) {
 
     //set MAX_PC Randomly
     unsigned int max = rand() % 10000;
-    printf("\nmax pc: %d\n\n", max);
+    // printf("\nmax pc: %d\n\n", max);
     set_MAX_PC(temp, max);
 
     //TODO Generate Trap Arrays set them.
@@ -218,7 +219,7 @@ void add_n( fifo_queue new_procs) {
     free(why);
 
   }
-  printf("Number Of New Procs Added: %d\n", num);
+  // printf("Number Of New Procs Added: %d\n", num);
 }
 
 
@@ -346,7 +347,7 @@ int IO_Trap( PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queu
   Puts first process into running state, and sets the sys_stack to this process.
 */
 int dispatcher(PCB_p * current, priority_queue pq) {
-  printf("Dispatcher\n");
+  // printf("Dispatcher\n");
   if (pq == NULL) return 1;
   if (current != NULL && (*current) != NULL)
     (*current)->context->pc = sys_stack;
