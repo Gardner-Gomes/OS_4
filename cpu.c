@@ -1,3 +1,7 @@
+/*
+  Gardner Gomes - This code is a mess I should have just done everything from scratch, using others code bases is bad.
+  Jimmy Best
+*/
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -12,7 +16,7 @@
 #define QUANTUM_S 100
 
 static unsigned int sys_stack = 0;
-int Number_Of_Procs = 0;
+int Number_Of_Procs = 0;  //keeps track of number of Processes
 
 int main() {
   
@@ -51,32 +55,38 @@ int main() {
     //if(pq) {
     if(Number_Of_Procs <= 200 && IO_Queue->count < 60) {
        add_n(new_procs);
-    }
+       printf("Adding New Procs\n");
+    } // Does not add more than 200 processes and checks if less than 60 waiting on IO.
    
 
-    printf("Big While Loop\n");
-    safety = scheduler(4,current,pq,new_procs,old_procs,quantum_count,IO_Queue);
+    printf("Big While Loop\n"); //Outer WHile loop for debugging.
+    safety = scheduler(4,current,pq,new_procs,old_procs,quantum_count,IO_Queue); //Safety is a check if current process is null
     
     printf("Current PID: %d\n", (*current)->pid);
 
-    *Quantum_Timer = pq[(*current)->priority]->quantum;
+    if(safety != -1) {
+      *Quantum_Timer = pq[(*current)->priority]->quantum;
+    }
     *IO_Timer = *Quantum_Timer / 3;
-    printf("Quantum Timer: %d\n", *Quantum_Timer);
+    // printf("Quantum Timer: %d\n", *Quantum_Timer);
     while (*Quantum_Timer) {
-      if(safety == -1) {
+      if(safety == -1) { // if no process is running break out and schedule next processess
+        printf("NOT SAFE\n");
         break;
       }
           //running pc ++
-        // printf("One Instruction WHILE\n");
-        // printf("PC VALUE: %d\n", (*current)->context->pc);
         (*current)->context->pc = (*current)->context->pc + 1;
+
           //CHeck trap Values vs pc
-        printf("Current PC Value: %d\n",(*current)->context->pc);
+        // printf("Current PC Value: %d\n",(*current)->context->pc);
         /*
         Figure out how to access the elements of the array in the struct
         It is not getting the right values to compare against and is true every 8 or 11 cycles right now.
-
+        Conntains Method Broken Code Not Working Here.
+        BROKEN 
+        TODO
         */
+
         if(contains((*current)->IO_1_TRAPS, (*current)->context->pc, 4) ||
             contains((*current)->IO_2_TRAPS, (*current)->context->pc, 4)) {
             safety = IO_Trap(current, pq, new_procs, old_procs, quantum_count, IO_Queue);//calls IO_trap
@@ -90,16 +100,17 @@ int main() {
          
 
           //Decrement Timers
-          // printf("Quantum Timer: %d\n", *Quantum_Timer);
+          printf("Quantum Timer: %d\n", *Quantum_Timer);
         *Quantum_Timer = *Quantum_Timer - 1;
         *IO_Timer = *IO_Timer - 1;
-        printf("IO Timer: %d\nQuantum Timer: %d\n", *IO_Timer, *Quantum_Timer);
+
+        // printf("IO Timer: %d\nQuantum Timer: %d\n", *IO_Timer, *Quantum_Timer);
           //if pc == max_PC -> term_Count++ & pc =0
-        if((*current)->context->pc == (*current)->MAX_PC) {
+        if((*current)->context->pc == (*current)->MAX_PC) { //Resets the PC Value if it reached Max WORKS
           (*current)->term_count = (*current)->term_count + 1;
-          printf("TermCount: %d MAX: %d ",(*current)->term_count , (*current)->terminate);
+          // printf("TermCount: %d MAX: %d ",(*current)->term_count , (*current)->terminate);
           (*current)->context->pc = 0;
-          printf("MAX_PC MET\n");
+          // printf("MAX_PC MET\n");
         }
         
 
@@ -110,6 +121,7 @@ int main() {
           printf("IO RET\n");
         }
           //if term_count == terminate -> call terminate
+          //Possible Broken
           if ((*current)->term_count >= (*current)->terminate) {
             printf("SHould this terminate: %d >= %d\n",(*current)->term_count, (*current)->terminate);
             safety = terminate(current, pq, new_procs, old_procs, quantum_count, IO_Queue);
@@ -149,7 +161,7 @@ int main() {
 //
 void add_n( fifo_queue new_procs) {
   printf("ADD N\n");
-  int num = rand() % 6;
+  int num = rand() % 100;
   Number_Of_Procs = Number_Of_Procs + num;
   int i;
   for (i = 0; i < num; i++) {
@@ -173,23 +185,32 @@ void add_n( fifo_queue new_procs) {
       IO1[j] = rand() % max;
       IO2[j] = rand() % max;
 
-      printf("IO1[%d]: %d, IO2[%d]: %d\n", j, IO1[j], j, IO2[j]);
+      // printf("IO1[%d]: %d, IO2[%d]: %d\n", j, IO1[j], j, IO2[j]);
 
     }
+    /* This does not work? 
+      idk the address is set and does not change.
+      can access values as temp but once added to pq, cant get elements for trap
+      DEBUGGING!!!!
+      TODO
+      */
     set_IO_1_TRAPS(temp, IO1);
+    // printf("Address for IOTRAP1: %p, Address for ARRAY: %p\n", temp->IO_1_TRAPS, IO1);
+    int *ptr;
+    ptr = (temp->IO_1_TRAPS);
+    // printf("value at 0: %d\n",ptr[4]);
     set_IO_2_TRAPS(temp, IO2);
 
     //set Term Count Randomly
-    
+    //Works DO not Break pls
     int termC = rand() % 11;
-    printf("term Count == %d\n",temp->term_count);
+    // printf("term Count == %d\n",temp->term_count);
     temp->terminate = termC;
-    printf("term Count max == %d\n", temp->terminate);
+    // printf("term Count max == %d\n", temp->terminate);   SOlved
     // set_term_count(temp, termC);
 
     char * why = toString(temp);
     q_enqueue(new_procs, temp);
-
     why = q_toString(new_procs);
     printf("\n%s\n", why);
     free(why);
@@ -259,14 +280,14 @@ int scheduler(int schedule_bit, PCB_p * current, priority_queue pq, fifo_queue n
   case 2:
   printf("Case 2 Terminate\n");
     safety = dispatcher(current, pq);
-    printf("WTH?\n");
+    // printf("WTH?\n");
     if (old_procs->count > 10) {
       while (old_procs->count > 0) {
         //Clears zombie processes if there are 10 or more,
         destructor(q_dequeue(old_procs));
       }
     }
-    printf("WTH?\n");
+    // printf("WTH?\n");
     break;
   //IO_Trap Case
   case 3: 
@@ -297,6 +318,7 @@ int scheduler(int schedule_bit, PCB_p * current, priority_queue pq, fifo_queue n
 */
 PCB_p IO_ret(priority_queue pq, fifo_queue IO_Queue) {
   printf("IO_RETTTTTT\n");
+  //IDK IF THIS WORKS BECAUSE THE IO_TRAP IS BROKEN
   PCB_p ready_Proc = q_dequeue(IO_Queue);
   if (ready_Proc != NULL) {
     enum state_type new_state = ready;
@@ -329,19 +351,24 @@ int dispatcher(PCB_p * current, priority_queue pq) {
   
   PCB_p new_proc = find_first_empty(pq);
   if (new_proc != NULL) {
-    printf("Here\n");
+    // printf("Here\n");
     enum state_type new_state = running;
     new_proc->state = new_state;
     *current = new_proc;
     sys_stack = new_proc->context->pc;
   } else {
+    /*
+        It Crashes Here, it was because current was set to null, now it is idle.
+        crashes unless you coment out the change of current.
+        TODO
+    */
     // PCB_p IDLE = constructor();
     // *current = IDLE;
     // printf("Crash?\n");
-    // return -1;
+    return -1;
     // printf("PID? : %d\n", (*current)->pid);
   }
-  printf("after Crash?\n");
+  // printf("after Crash?\n");
   return 0;
 }
 
@@ -375,22 +402,21 @@ int terminate( PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_qu
   return 0;
 }
 
-// int checkTerm() {
-//   return (rand() % 100) < 15;
-// }
 
 /*
   helper method to check if the array conains an id assigned to a privledged process.
 */
 int contains( int * arr,  int value, int size) {
+  //BROKEN
+  //TODO
   int i;
   int retval = 0;
   for (i = 0; i < size; i++) {
-    printf("ArrVal: %d\n",arr[i]);
+    // printf("ArrVal: %d\n",arr[i]);
     if (arr[i] == value) {
-        printf("PC: %d ARRVAL: %d\n",value,arr[i]);
+        // printf("PC: %d ARRVAL: %d\n",value,arr[i]);
         retval = 1;
-        printf("CONTAINS TRUE\n");
+        // printf("CONTAINS TRUE\n");
         break;
     }
   }
