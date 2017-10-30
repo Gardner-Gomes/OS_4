@@ -86,17 +86,17 @@ int main() {
         BROKEN 
         TODO
         */
-
-        // if(contains((*current)->IO_1_TRAPS, (*current)->context->pc, 4) ||
-        //     contains((*current)->IO_2_TRAPS, (*current)->context->pc, 4)) {
-        //     safety = IO_Trap(current, pq, new_procs, old_procs, quantum_count, IO_Queue);//calls IO_trap
-        //     if(safety == -1) {
-        //       printf("IO TRAP CALL Safety\n");
-        //       break;
-        //     }
-        //     printf("IO TRAP CALL new PID: %d\n", (*current)->pid);
-        //     *Quantum_Timer = pq[(*current)->priority]->quantum;
-        // }
+        //for (i = 0; i < 4; i++) printf ("%d\n", pcb->IO_1_TRAPS[i]);
+        if(contains((*current)->IO_1_TRAPS, (*current)->context->pc, 4) ||
+            contains((*current)->IO_2_TRAPS, (*current)->context->pc, 4)) {
+            safety = IO_Trap(current, pq, new_procs, old_procs, quantum_count, IO_Queue);//calls IO_trap
+            if(safety == -1) {
+              printf("IO TRAP CALL Safety\n");
+              break;
+            }
+            printf("IO TRAP CALL new PID: %d\n", (*current)->pid);
+            *Quantum_Timer = pq[(*current)->priority]->quantum;
+        }
          
 
           //Decrement Timers
@@ -194,12 +194,14 @@ void add_n( fifo_queue new_procs) {
       DEBUGGING!!!!
       TODO
       */
-    set_IO_1_TRAPS(temp, IO1);
+    int * I1 = IO1;
+    int * I2 = IO2;
+    set_IO_1_TRAPS(temp, I1);
     // printf("Address for IOTRAP1: %p, Address for ARRAY: %p\n", temp->IO_1_TRAPS, IO1);
     int *ptr;
     ptr = (temp->IO_1_TRAPS);
     // printf("value at 0: %d\n",ptr[4]);
-    set_IO_2_TRAPS(temp, IO2);
+    set_IO_2_TRAPS(temp, I2);
 
     //set Term Count Randomly
     //Works DO not Break pls
@@ -412,11 +414,11 @@ int contains( int * arr,  int value, int size) {
   int i;
   int retval = 0;
   for (i = 0; i < size; i++) {
-    // printf("ArrVal: %d\n",arr[i]);
+    //printf("\nArrVal: %d\n",arr[i]);
     if (arr[i] == value) {
-        // printf("PC: %d ARRVAL: %d\n",value,arr[i]);
+        //printf("PC: %d ARRVAL: %d\n",value,arr[i]);
         retval = 1;
-        // printf("CONTAINS TRUE\n");
+        //printf("CONTAINS TRUE\n\n");
         break;
     }
   }

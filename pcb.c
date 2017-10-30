@@ -36,8 +36,8 @@ PCB_p constructor() {
   pcb->termination = time(NULL);
   pcb->terminate = 0;
   pcb->term_count = 0;
-  pcb->IO_1_TRAPS;
-  pcb->IO_2_TRAPS;
+  pcb->IO_1_TRAPS = NULL;
+  pcb->IO_2_TRAPS = NULL;
   
   assignPid(pcb, &pid);
   return pcb;
@@ -170,7 +170,9 @@ int *  get_IO_1_TRAPS(PCB_p pcb) {
 
 int set_IO_1_TRAPS(PCB_p pcb, int * theArr) {
   if (pcb == NULL) return -1;
+  int i;
   pcb->IO_1_TRAPS = theArr;
+  //for (i = 0; i < 4; i++) printf ("%d\n", pcb->IO_1_TRAPS[i]);
   return 0;
 }
 
