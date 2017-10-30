@@ -12,28 +12,24 @@
 #define QUANTUM_S 100
 
 static unsigned int sys_stack = 0;
-
+int Number_Of_Procs = 0;
 int main() {
 
   //
   // Init all variables for processes
   //
-  printf("of\n");
   priority_queue pq = priority_queue_constructor();
   fifo_queue new_procs = fifo_queue_constructor();
   fifo_queue old_procs = fifo_queue_constructor(); 
   fifo_queue IO_Queue = fifo_queue_constructor(); 
-  printf("of\n");
   // Used to manage current process
   PCB_p * current = malloc(sizeof(PCB_p));
-  
-  printf("of\n");
   unsigned int * pc = malloc(sizeof(unsigned int));
   *pc = 0;
   unsigned int * Quantum_Timer = malloc(sizeof(unsigned int)); //QUantum Timer
   *Quantum_Timer = 1;
   unsigned int * IO_Timer = malloc(sizeof(unsigned int));
-  *IO_Timer = *Quantum_Timer * 3;
+  *IO_Timer = *Quantum_Timer * 2;
   //Fibonacci sequesnce or length of quantum based on prioriety
   int quantum[] = { 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597 }; 
   int * count = malloc(sizeof(int));
@@ -41,70 +37,90 @@ int main() {
   int * quantum_count = malloc(sizeof(int));
   *quantum_count = 0;
   *current = NULL;
+  int safety = 1;
   srand(time(NULL));
-  printf("of\n");
   int i;
   for (i = 0; i < QUEUE_SIZE; i++)
     q_setquantum(get_queue(pq, i), quantum[i] * 1000);
  
-  printf("of\n");
+  printf("Before Loop\n");
   while(1) {
     //Generate Processes randomly
     //if pq < maxprocs
     //if(pq) {
-    printf("0\n"); 
-    add_n(new_procs);
-
-    printf("of\n");
-    scheduler(0,current,pq,new_procs,old_procs,quantum_count);
-    printf("%d\n", (*current)->pid);
-
-    *Quantum_Timer = quantum[(*current)->priority] + 1000;
-    while (*Quantum_Timer) {
-        //running pc ++
-      printf("1\n");
-      printf("%d\n", (*current)->context->pc);
-      (*current)->context->pc++;
-        //CHeck trap Values vs pc
-      printf("2\n");
-      if(contains((*current)->IO_1_TRAPS, (*current)->context->pc, 4) ||
-          contains((*current)->IO_2_TRAPS, (*current)->context->pc, 4)) {
-        IO_Trap(*current);
-      }
-        //if true ^ -> call IO_Trap
-
-        //Decrement Timers
-      printf("3\n");
-      *Quantum_Timer--;
-      *IO_Timer--;
-        //if pc == max_PC -> term_Count++ & pc =0
-      printf("4\n");
-      if((*current)->context->pc == (*current)->MAX_PC) {
-        (*current)->term_count++;
-        (*current)->context->pc = 0;
-      }
-        //if term_count == terminate -> call terminate
-      printf("5\n");
-      if ((*current)->term_count == (*current)->terminate) {
-        terminate(current, pq, new_procs, old_procs, quantum_count);
-      }
-
-        //if(IO_Timer == 0) -> IO_Ret
-      printf("6\n");
-      if(*IO_Timer == 0) {
-        IO_ret();
-      }
+    if(Number_Of_Procs <= 50) {
+       add_n(new_procs);
     }
-    printf("7\n");
-    *quantum_count++;
+   
+
+    printf("Big While Loop\n");
+    safety = scheduler(4,current,pq,new_procs,old_procs,quantum_count,IO_Queue);
+    
+    printf("Current PID: %d\n", (*current)->pid);
+
+    *Quantum_Timer = pq[(*current)->priority]->quantum;
+    printf("Quantum Timer: %d\n", *Quantum_Timer);
+    while (*Quantum_Timer) {
+          
+        printf("NOT NULL\n");
+          //running pc ++
+        // printf("One Instruction WHILE\n");
+        // printf("PC VALUE: %d\n", (*current)->context->pc);
+        (*current)->context->pc = (*current)->context->pc + 1;
+          //CHeck trap Values vs pc
+      
+        if(contains((*current)->IO_1_TRAPS, (*current)->context->pc, 4) ||
+            contains((*current)->IO_2_TRAPS, (*current)->context->pc, 4)) {
+            safety = IO_Trap(current, pq, new_procs, old_procs, quantum_count, IO_Queue);//calls IO_trap
+            if(safety = -1) {
+              printf("IO TRAP CALL Safety\n");
+              break;
+            }
+            printf("IO TRAP CALL\n");
+            *Quantum_Timer = pq[(*current)->priority]->quantum;
+        }
+         
+
+          //Decrement Timers
+        *Quantum_Timer = *Quantum_Timer - 1;
+        *IO_Timer = *IO_Timer - 1;
+          //if pc == max_PC -> term_Count++ & pc =0
+        if((*current)->context->pc == (*current)->MAX_PC) {
+          (*current)->term_count = (*current)->term_count + 1;
+          printf("TermCount: %d MAX: %d ",(*current)->term_count , (*current)->terminate);
+          (*current)->context->pc = 0;
+          printf("MAX_PC MET\n");
+        }
+        
+
+          //if(IO_Timer == 0) -> IO_Ret
+        if(*IO_Timer == 0) {
+          *IO_Timer = *Quantum_Timer * 2;
+          IO_ret(pq,IO_Queue);
+          printf("IO RET\n");
+        }
+          //if term_count == terminate -> call terminate
+          if ((*current)->term_count >= (*current)->terminate) {
+            safety = terminate(current, pq, new_procs, old_procs, quantum_count, IO_Queue);
+            printf("TERMINATE\n");
+            if(safety = -1) {
+              break;
+            }
+            *Quantum_Timer = pq[(*current)->priority]->quantum;            
+          }
+        
+          printf("End of Loop\n");
+      
+    }
+
+    *quantum_count = *quantum_count + 1;
 
     //timerinterruptcall()
-    printf("8\n");
-    timer_interrupt(current, pq, new_procs, old_procs, quantum_count);
-
-    char * why = to_string_3(*quantum_count, pq);
-    printf("%s\n", why);
-    free(why);
+    printf("Timer INT\n");
+    safety = timer_interrupt(current, pq, new_procs, old_procs, quantum_count, IO_Queue);
+    char * output = to_string_3(*quantum_count, pq);
+    printf("%s\n", output);
+    free(output);
     
   }
 
@@ -122,9 +138,11 @@ int main() {
 //Adds a Random number of Processes to the queue. between 0-5
 //
 void add_n( fifo_queue new_procs) {
-  int num = rand() % 6;
+  printf("ADD N\n");
+  int num = rand() % 200;
+  Number_Of_Procs = Number_Of_Procs + num;
   int i;
-  for (i = 0; i <= num; i++) {
+  for (i = 0; i < num; i++) {
     PCB_p temp = constructor();
 
     //set MAX_PC Randomly
@@ -142,78 +160,103 @@ void add_n( fifo_queue new_procs) {
 
       */
       IO1[j] = rand() % max;
-      IO2[j] = rand() % max;
+      IO2[j] = rand() % max / 2;
     }
     set_IO_1_TRAPS(temp, IO1);
     set_IO_2_TRAPS(temp, IO2);
 
     //set Term Count Randomly
-
+    
     int termC = rand() % 11;
+    printf("term Count == %d\n",termC);
     set_term_count(temp, termC);
     char * why = toString(temp);
-    printf("%s\n", why);
     q_enqueue(new_procs, temp);
 
   }
+  printf("Number Of New Procs Added: %d\n", num);
 }
 
 
 /*
   Timer Interrupt, sets running process to Interrupted then calls scheduler.
 */
-int timer_interrupt(PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum_count) {
-  if (pq == NULL) return 1;
+int timer_interrupt(PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum_count, fifo_queue IO_Queue) {
+  int safety = 1;
+  if (pq == NULL) return safety;
+  if (current == NULL || *current == NULL) return -1;
   sys_stack = (*current)->context->pc;
   enum state_type new_state = interrupted;
   if (current != NULL && (*current) != NULL) {
     (*current)->state = new_state;
     (*current)->context->pc = sys_stack;
+    // pseudo_iret(&(*current)->context->pc);
   }
-  scheduler(1, current, pq, new_procs, old_procs, quantum_count);
-  pseudo_iret(&(*current)->context->pc);
-  return 0;
+  safety = scheduler(1, current, pq, new_procs, old_procs, quantum_count, IO_Queue);
+  
+  return safety;
 }
 
 /*
   Determines what to do for a certain interrupt, calls dispatcher if necessary.
 */
-int scheduler(int schedule_bit, PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum) {
+int scheduler(int schedule_bit, PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum, fifo_queue IO_Queue) {
+  int safety = 2;
   if (pq == NULL) return 1;
-
+  
+  printf("Scheduler\n");
   // add new processes to current processes
   while (new_procs->count > 0) {
+    // printf("Adding new procs to queue\n");
     enum state_type new_state = ready;
     PCB_p to_enqueue = q_dequeue(new_procs);
     setState(to_enqueue, new_state);
     enqueue_ready(pq, 0, to_enqueue);
+    safety = 2;
   }
-
   // in this case we will append to fifo_queue and dispatch
   switch (schedule_bit) {
 
     // interrupt case
   case 1:
+  printf("Case 1 Timer\n");
+  
     if (current != NULL && *current != NULL) {
       enum state_type new_state = ready;
-      setState(*current, new_state);
-      setPriority(*current, (*current)->priority + 1);  //lower prioriety of current
+      setState(*current, new_state); 
+      if ((*current)->priority < 15) {
+        setPriority(*current, (*current)->priority + 1);  //lower prioriety of current
+      }
       enqueue_ready(pq, (*current)->priority, *current);
     }
-    dispatcher(current, pq);
+    safety = dispatcher(current, pq);
     break;
 
     // terminate case
   case 2:
-    dispatcher(current, pq);
-    if (old_procs->count > 10)
-      while (old_procs->count > 0)//Clears zombie processes if there are 10 or more,
-	destructor(q_dequeue(old_procs));
+  printf("Case 2 Terminate\n");
+    safety = dispatcher(current, pq);
+    printf("WTH?\n");
+    if (old_procs->count > 10) {
+      while (old_procs->count > 0) {
+        //Clears zombie processes if there are 10 or more,
+        destructor(q_dequeue(old_procs));
+      }
+    }
+    printf("WTH?\n");
     break;
-  case 3: //dispatcher
-  case 4: //dispatcher
+  //IO_Trap Case
+  case 3: 
+  printf("Case 3 Trap\n");
+    safety = dispatcher(current,pq);
+    break;
+    //Startup Call to set things in order
+  case 4: 
+    safety = dispatcher(current, pq);
+    break;
   default:
-    dispatcher(current, pq);
+    printf("Case Default\n");
+    
     break;
   }
 
@@ -223,38 +266,56 @@ int scheduler(int schedule_bit, PCB_p * current, priority_queue pq, fifo_queue n
     printf("\n\n Resetting priorities\n\n");
     reset_all_priority(pq);
   }
-  return 0;
+  return safety;
 }
 
 /*
   Returns the process froom IO queue
 */
-PCB_p IO_ret() {
-    
+PCB_p IO_ret(priority_queue pq, fifo_queue IO_Queue) {
+  PCB_p ready_Proc = q_dequeue(IO_Queue);
+  if (ready_Proc != NULL) {
+    enum state_type new_state = ready;
+    ready_Proc->state = new_state;
+    enqueue_ready(pq, ready_Proc->priority, ready_Proc);
+  }
+  printf("IO_QUEUE SIZE: %d\n", IO_Queue->count);
 }
 /*
    Puts calling process in blocked queue
 */
-void IO_Trap(PCB_p thepcb){
-    
+int IO_Trap( PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum_count, fifo_queue IO_Queue){
+  if (current == NULL || *current == NULL) return -1;
+  enum state_type new = blocked;
+  (*current)->state = new;
+  q_enqueue(IO_Queue, *current);
+  printf("IO_QUEUE SIZE: %d\n", IO_Queue->count);
+  scheduler(3, current, pq, new_procs, old_procs, quantum_count, IO_Queue);
+  // pseudo_iret(&(*current)->context->pc);
+  return 0;
 }
 /*
   Puts first process into running state, and sets the sys_stack to this process.
 */
 int dispatcher(PCB_p * current, priority_queue pq) {
+  printf("Dispatcher\n");
   if (pq == NULL) return 1;
   if (current != NULL && (*current) != NULL)
     (*current)->context->pc = sys_stack;
 
   PCB_p new_proc = find_first_empty(pq);
   if (new_proc != NULL) {
+    printf("Here\n");
     enum state_type new_state = running;
     new_proc->state = new_state;
     *current = new_proc;
     sys_stack = new_proc->context->pc;
   } else {
     *current = NULL;
+    printf("Crash?\n");
+    // printf("PID? : %d\n", (*current)->pid);
   }
+  printf("after Crash?\n");
   return 0;
 }
 
@@ -277,13 +338,14 @@ PCB_p find_first_empty(priority_queue pq) {
 /*
   Terminates the running process and moves it to a zombie state.
 */
-int terminate( PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum_count) {
+int terminate( PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum_count, fifo_queue IO_Queue) {
   if (current == NULL || *current == NULL) return -1;
   enum state_type new = zombie;
   (*current)->state = new;
+  Number_Of_Procs = Number_Of_Procs - 1;
   q_enqueue(old_procs, *current);
-  scheduler(2, current, pq, new_procs, old_procs, quantum_count);
-  pseudo_iret(&(*current)->context->pc);
+  scheduler(2, current, pq, new_procs, old_procs, quantum_count, IO_Queue);
+  // pseudo_iret(&(*current)->context->pc);
   return 0;
 }
 

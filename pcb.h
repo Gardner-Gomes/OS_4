@@ -14,7 +14,7 @@ typedef struct cpu_context {// CPU state for the LC-3 processor
 
 typedef CPU_context_s* CPU_context_p;// _p means that this is a pointer to a structure
 
-enum state_type {new, ready, running, interrupted, waiting, halted, zombie};
+enum state_type {new, ready, running, interrupted, waiting, halted, zombie, blocked};
 
 typedef struct pcb {// Process control block
   unsigned int pid; // process identification

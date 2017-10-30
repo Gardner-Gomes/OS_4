@@ -5,15 +5,15 @@ int contains(unsigned int arr[], unsigned int value, int size);
 
 PCB_p find_first_empty(priority_queue pq);
 int dispatcher(PCB_p * current, priority_queue pq);
-int scheduler(int schedule_bit, PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum);
+int scheduler(int schedule_bit, PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum, fifo_queue IO_Queue);
 
 char * to_string_3(int iteration_count, priority_queue pq);
 int reset_all_priority(priority_queue pq);
 unsigned int increment_pc(PCB_p * current, priority_queue pq, unsigned int * quantum_count);
 
-int terminate( PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum);
-int timer_interrupt(PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum);
+int terminate( PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum, fifo_queue IO_Queue);
+int timer_interrupt(PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum, fifo_queue IO_Queue);
 void pseudo_iret(unsigned int * pc);
 
-PCB_p IO_ret();
-void IO_Trap(PCB_p thepcb);
+PCB_p IO_ret(priority_queue pq, fifo_queue IO_Queue);
+int IO_Trap(PCB_p * current, priority_queue pq, fifo_queue new_procs, fifo_queue old_procs, int * quantum, fifo_queue IO_Queue);
